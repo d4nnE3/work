@@ -13,11 +13,11 @@ inline pros::Motor intake(17);
 inline pros::Motor arm1(18);
 inline pros::Motor arm2(19);
 
-inline pros::adi::DigitalIn clampPis('A');
-inline pros::adi::DigitalIn lDoinkerPis('B');
-inline pros::adi::DigitalIn rDoinkerPis('C');
-inline pros::adi::DigitalIn ptoPis('D');
-inline pros::adi::DigitalIn intakePis('E');
+inline pros::adi::DigitalOut clampPis('A');
+inline pros::adi::DigitalOut lDoinkerPis('B');
+inline pros::adi::DigitalOut rDoinkerPis('C');
+inline pros::adi::DigitalOut ptoPis('D');
+inline pros::adi::DigitalOut intakePis('E');
 
 // inline pros::Motor intake(1);
 // inline pros::adi::DigitalIn limit_switch('A');

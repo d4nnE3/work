@@ -1,6 +1,11 @@
 #include "main.h"
 #include "subsystems.hpp"
 
+float clamp(float min, float val, float max)
+{
+    return (min > ((val < max) ? val : max) ? min : ((val < max) ? val : max));
+}
+
 // ----------------------
 // |      Intake        |
 // ----------------------
@@ -33,4 +38,117 @@ void reverseIntake()
         intake.move(0);
         intakeState = 0;
     }
+}
+
+// ----------------------
+// |        Arm         |
+// ----------------------
+float armPos[] = {0, 85.5, 420};
+int numOfArmPos = sizeof(armPos) / sizeof(armPos[0]);
+int armState = 0;
+float armTarget = 0;
+float armPrevErr = 0;
+bool autoArm = true;
+
+void armMode()
+{
+    autoArm = !autoArm;
+    if (autoArm)
+    {
+        armState = 0;
+        armTarget = armPos[armState];
+    }
+}
+
+void armControlTask()
+{
+    while (1)
+    {
+        float kP = .5;
+        float kD = 0;
+        float armMotPos = arm1.get_position(rev) * 360;
+        float err = armTarget - armMotPos;
+        float output = kP * err + kD * (err - armPrevErr);
+        armPrevErr = err;
+        output = clamp(-100, output, 100);
+        if (autoArm)
+        {
+            arm1.move(127 * output / 100);
+            arm2.move(127 * output / 100);
+        }
+        pros::delay(10);
+    }
+}
+
+void armUp()
+{
+    if (autoArm)
+    {
+        if (armState < numOfArmPos - 1)
+        {
+            armState++;
+            armTarget = armPos[armState];
+        }
+    }
+    else
+    {
+        arm1.move(127);
+        arm2.move(127);
+    }
+}
+
+void armDown()
+{
+    if (autoArm)
+    {
+        if (armState > 0)
+        {
+            armState--;
+            armTarget = armPos[armState];
+        }
+    }
+    else
+    {
+        arm1.move(-127);
+        arm2.move(-127);
+    }
+}
+
+void armReleased()
+{
+    if (!autoArm)
+    {
+        arm1.set_brake_mode(MOTOR_BRAKE_HOLD);
+        arm1.brake();
+        arm2.set_brake_mode(MOTOR_BRAKE_HOLD);
+        arm2.brake();
+    }
+}
+
+// ----------------------
+// |       Clamp        |
+// ----------------------
+
+bool clampState = false;
+void clamp()
+{
+    clampState = !clampState;
+    clampPis.set_value(clampState);
+}
+
+// ----------------------
+// |      Doinker       |
+// ----------------------
+
+bool lDoinkerState = false;
+bool rDoinkerState = false;
+void lDoinker()
+{
+    lDoinkerState = !lDoinkerState;
+    lDoinkerPis.set_value(lDoinkerState);
+}
+void rDoinker()
+{
+    rDoinkerState = !rDoinkerState;
+    rDoinkerPis.set_value(rDoinkerState);
 }
