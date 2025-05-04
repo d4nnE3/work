@@ -43,7 +43,7 @@ void reverseIntake()
 // ----------------------
 // |        Arm         |
 // ----------------------
-float armPos[] = {0, 85.5, 420};
+float armPos[] = {0, 210, 1079};
 int numOfArmPos = sizeof(armPos) / sizeof(armPos[0]);
 int armState = 0;
 float armTarget = 0;
@@ -62,20 +62,24 @@ void armMode()
 
 void armControlTask()
 {
+    arm1.set_zero_position(0);
+    armTarget = 0;
     while (1)
     {
-        float kP = .5;
+        float kP = 0.3;
         float kD = 0;
-        float armMotPos = arm1.get_position(rev) * 360;
+        float armMotPos = arm1.get_position();
         float err = armTarget - armMotPos;
         float output = kP * err + kD * (err - armPrevErr);
         armPrevErr = err;
-        output = clamp(-100, output, 100);
+        output = clamp(-127, output, 127);
+
         if (autoArm)
         {
-            arm1.move(127 * output / 100);
-            arm2.move(127 * output / 100);
+            arm1.move(output);
+            arm2.move(output);
         }
+
         pros::delay(10);
     }
 }

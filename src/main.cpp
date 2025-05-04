@@ -68,14 +68,20 @@ void initialize()
     // chassis.opcontrol_curve_buttons_right_set(pros::E_CONTROLLER_DIGITAL_Y, pros::E_CONTROLLER_DIGITAL_A);
 
     // Autonomous Selector using LLEMU
-    ez::as::auton_selector.autons_add({
-        {"Baker blue", baker_blue},
-    });
+    ez::as::auton_selector.autons_add({// {"Ring rush blue", ring_blue},
+                                       // {"Ring rush red", ring_red},
+                                       // {"Baker blue", baker_blue},
+                                       // {"Baker red", baker_red},
+                                       // {"Solo red", solo_red},
+                                       {"Solo blue", solo_blue}});
 
     // Initialize chassis and auton selector
     chassis.initialize();
     ez::as::initialize();
     master.rumble(chassis.drive_imu_calibrated() ? "." : "---");
+
+    colorSens.set_led_pwm(100);
+    pros::Task armTask(armControlTask);
 }
 
 /**
@@ -260,7 +266,7 @@ void opcontrol()
     // This is preference to what you like to drive on
     chassis.drive_brake_set(MOTOR_BRAKE_COAST);
 
-    autonomous();
+    // autonomous();
 
     while (true)
     {
@@ -277,7 +283,7 @@ void opcontrol()
         // Put more user control code here!
         // . . .
 
-        // pros::Task armTask(armControlTask);
+        // holdRing();
 
         // Run the intake
         if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1))
@@ -297,6 +303,11 @@ void opcontrol()
         if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
         {
             armDown();
+        }
+        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1) == 0 &&
+            master.get_digital(pros::E_CONTROLLER_DIGITAL_R2) == 0)
+        {
+            armReleased();
         }
         if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A))
         {
